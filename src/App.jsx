@@ -12,27 +12,34 @@ const ERROR_MSG = {
 };
 
 function App() {
-	const [isAddingProject, setIsAddingProject] = useState(false);
-	const [projectsList, setProjectsList] = useState([]);
-	const [selectedProject, setSelectedProject] = useState({});
 	const [errorMessages, setErrorMessages] = useState(ERROR_MSG);
 
+	const [projectsState, setProjectsState] = useState({
+		isAdding: false,
+		selectedProject: undefined,
+		projList: [],
+	});
+
 	function handleSelect(project) {
-		setSelectedProject((prevProject) => {
-			const newSelected = project;
-			return newSelected;
+		setProjectsState((prevState) => {
+			const updatedState = {
+				...prevState,
+				isAdding: false,
+				selectedProject: project,
+			};
+			return updatedState;
 		});
-
-		setIsAddingProject(false);
-	}
-
-	function isEmpty(obj) {
-		return Object.keys(obj).length === 0;
 	}
 
 	function handleAddingProject(value) {
-		setIsAddingProject(value);
-		setSelectedProject({});
+		setProjectsState((prevState) => {
+			const updatedState = {
+				...prevState,
+				isAdding: value,
+				selectedProject: undefined,
+			};
+			return updatedState;
+		});
 	}
 
 	function isValidDate(dateString) {
@@ -73,40 +80,39 @@ function App() {
 
 		setErrorMessages(ERROR_MSG);
 
-		setProjectsList((prevList) => {
-			const updatedList = [project, ...prevList];
-			return updatedList;
+		setProjectsState((prevState) => {
+			const updatedState = {
+				projList: [project, ...prevState.projList],
+				isAdding: false,
+				selectedProject: project,
+			};
+			return updatedState;
 		});
-		setIsAddingProject(false);
 	}
 
 	function deleteProject(delId) {
-		setProjectsList((prevList) => {
-			const updatedList = prevList.filter((project) => project.id !== delId);
-			return updatedList;
+		setProjectsState((prevState) => {
+			const updatedState = {
+				projList: prevState.projList.filter((project) => project.id !== delId),
+				isAdding: false,
+				selectedProject: undefined,
+			};
+			return updatedState;
 		});
-		setSelectedProject({});
 	}
 
 	return (
 		<div className="h-screen pt-20 flex">
-			<Sidebar addProject={handleAddingProject}>
-				{projectsList.map((project, index) => (
-					<li key={`project-${index}`}>
-						<button
-							onClick={() => handleSelect(project)}
-							className="px-4 py-2 w-full text-start font-medium capitalize rounded-md transition-all text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
-						>
-							- {project.title}
-						</button>
-					</li>
-				))}
-			</Sidebar>
+			<Sidebar
+				addProject={handleAddingProject}
+				projectsState={projectsState}
+				onSelect={handleSelect}
+			></Sidebar>
 
-			{!isAddingProject && isEmpty(selectedProject) && (
+			{!projectsState.isAdding && !projectsState.selectedProject && (
 				<NoProject addProject={handleAddingProject} />
 			)}
-			{isAddingProject && isEmpty(selectedProject) && (
+			{projectsState.isAdding && !projectsState.selectedProject && (
 				<NewProject
 					errorsMsg={errorMessages}
 					addProject={handleAddingProject}
@@ -114,10 +120,10 @@ function App() {
 				/>
 			)}
 
-			{!isEmpty(selectedProject) && (
-				<ProjectDetails project={selectedProject}>
+			{projectsState.selectedProject && (
+				<ProjectDetails project={projectsState.selectedProject}>
 					<button
-						onClick={() => deleteProject(selectedProject.id)}
+						onClick={() => deleteProject(projectsState.selectedProject.id)}
 						className="rounded-xl font-medium px-6 py-4 me-4 transition-all text-xl bg-transparent hover:bg-zinc-200 text-zinc-600"
 					>
 						Cancella

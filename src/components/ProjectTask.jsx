@@ -9,12 +9,15 @@ export default function ProjectTask({ project }) {
 	}
 
 	function addTask() {
-		const newTask = newTaskRef.current;
+		const newTask = {
+			id: Date.now(),
+			text: newTaskRef.current,
+		};
 
-		if (newTask.trim() === "") return;
+		if (newTask.text.trim() === "") return;
 
-		setTasks((prevTasks) => {
-			const updatedTasks = [newTask, ...prevTasks];
+		setTasks(() => {
+			const updatedTasks = [newTask, ...project.tasks];
 			project.tasks = updatedTasks;
 			return updatedTasks;
 		});
@@ -23,9 +26,9 @@ export default function ProjectTask({ project }) {
 		document.getElementById("newTaskInput").value = "";
 	}
 
-	function deleteTask(index) {
-		setTasks((prevTasks) => {
-			const updatedTasks = prevTasks.filter((task, i) => i !== index);
+	function deleteTask(id) {
+		setTasks(() => {
+			const updatedTasks = project.tasks.filter((task) => task.id !== id);
 			project.tasks = updatedTasks;
 			return updatedTasks;
 		});
@@ -53,15 +56,18 @@ export default function ProjectTask({ project }) {
 
 			<div className="bg-zinc-100 px-3 py-6 mt-12">
 				<ol>
-					{tasks.map((task, index) => (
+					{project.tasks.length === 0 && (
+						<p>Non ci sono attività per questo progetto.</p>
+					)}
+					{project.tasks.map((task) => (
 						<li
-							key={`task-${index}`}
+							key={task.index}
 							className="px-2 py-2 font-medium rounded-md text-zinc-700 flex justify-between transition-all hover:bg-zinc-200"
 						>
-							{task}
+							<span>{task.text}</span>
 							<button
-								onClick={() => deleteTask(index)}
-								className="hover:bg-zinc-100 transition-all px-2 rounded-md"
+								onClick={() => deleteTask(task.id)}
+								className="hover:bg-zinc-100 hover:text-red-600 transition-all px-2 rounded-md"
 							>
 								Elimina
 							</button>

@@ -20,7 +20,7 @@ export default function ProjectDetails({ children, project }) {
 			<p className="font-medium text-xl text-zinc-400">
 				{formatDate(project.date)}
 			</p>
-			<p className="font-medium text-xl py-5 border-b-2 border-zinc-500">
+			<p className="font-medium text-xl py-5 border-b-2 border-zinc-500 whitespace-pre-wrap">
 				{project.description}
 			</p>
 
